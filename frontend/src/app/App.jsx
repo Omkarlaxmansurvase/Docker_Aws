@@ -2,25 +2,42 @@
 
 import './App.css'
 import { Editor } from "@monaco-editor/react"
+import {MonacoBinding} from "y-monaco"
+import { useRef, useMemo} from "react"
+import * as Y from "yjs"
+import {SocketIOProvider} from "y-socket.io"
 
 function App() {
 
-  const handleEditorMount = (editor, monaco) => {
-    monaco.editor.defineTheme('cursor-dark', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [],
-      colors: {
-        'editor.background': '#0a0a0a',
-        'editor.lineHighlightBackground': '#111111',
-        'editorLineNumber.foreground': '#3a3a3a',
-        'editorLineNumber.activeForeground': '#888888',
-        'editorCursor.foreground': '#ffffff',
-        'editor.selectionBackground': '#264f78',
-        'editorGutter.background': '#0a0a0a',
-      }
-    })
-    monaco.editor.setTheme('cursor-dark')
+  const editorRef = useRef(null)
+  const ydoc = useMemo(() => new Y.Doc(), [])
+  // const provider = useMemo(() => new SocketIOProvider("http://localhost:3000", "my-roomname", ydoc), [ydoc])
+  const yText = useMemo(() => ydoc.getText("monaco"), [ydoc])
+
+  // const handleEditorMount = (editor, monaco) => {
+  //   monaco.editor.defineTheme('cursor-dark', {
+  //     base: 'vs-dark',
+  //     inherit: true,
+  //     rules: [],
+  //     colors: {
+  //       'editor.background': '#0a0a0a',
+  //       'editor.lineHighlightBackground': '#111111',
+  //       'editorLineNumber.foreground': '#3a3a3a',
+  //       'editorLineNumber.activeForeground': '#888888',
+  //       'editorCursor.foreground': '#ffffff',
+  //       'editor.selectionBackground': '#264f78',
+  //       'editorGutter.background': '#0a0a0a',
+  //     }
+  //   })
+  //   monaco.editor.setTheme('cursor-dark')
+  // }
+
+
+  const handleMount = (editor)=>{
+    editorRef.current = editor
+
+    const provider = new SocketIOProvider("http://localhost:3000", "monaco", ydoc ,{autoConnect: true}) // this line connect editor to server 
+    const monacoBinding = new MonacoBinding(yText, editorRef.current.getModel(), new Set([editorRef.current]), provider.awareness)
   }
 
   return (
@@ -35,7 +52,7 @@ function App() {
         height="100%"
         language="javascript"
         theme="vs-dark"
-        onMount={handleEditorMount}
+        onMount={handleMount}
         options={{
           minimap: {
             enabled: false
