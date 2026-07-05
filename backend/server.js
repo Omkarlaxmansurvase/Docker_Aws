@@ -6,6 +6,8 @@ import {YSocketIO} from "y-socket.io/dist/server"
 
 
 const app = express()
+
+app.use(express.static("public"))
 const httpServer = createServer(app)
 const io = new Server(httpServer,{
     cors: {
@@ -17,10 +19,10 @@ const io = new Server(httpServer,{
 const ySocketIO = new YSocketIO(io)
  ySocketIO.initialize()
 
-app.get("/", (req, res) => {
-//   res.send("Hello World!")
-    res.status(200).json({ message: "Hello World!" })
-})
+// app.get("/", (req, res) => {
+// //   res.send("Hello World!")
+//     res.status(200).json({ message: "Hello World!" })
+// })
 
 app.get("/health", (req, res) => {
     res.status(200).json({ message: "Health check is working!" })
